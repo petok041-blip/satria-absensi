@@ -55,7 +55,7 @@ if menu == "🏠 Dashboard":
 
     st.info("Selamat datang di Sistem Satria Absensi Cloud. Gunakan menu di samping untuk mulai mencatat kehadiran.")
 
-# --- UI: Log Kehadiran ---
+#--- UI: Log Kehadiran ---
 elif menu == "📝 Log Kehadiran":
     st.title("📝 Form Kehadiran")
 
@@ -63,7 +63,11 @@ elif menu == "📝 Log Kehadiran":
         id_user = st.text_input("Nomor Identitas (ID)")
         nama = st.text_input("Nama Lengkap")
 
-        col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
+        # Tambahan: Kolom Keterangan (Opsional untuk Masuk/Keluar, Wajib untuk Izin/Sakit)
+        keterangan_input = st.text_area("Keterangan Tambahan (Contoh: Sakit Flu, Cuti Tahunan, Keperluan Keluarga)",
+                                        placeholder="Isi jika Anda memilih Sakit, Izin, atau Cuti...")
+
+        col_btn1, col_btn2, col_btn3, col_btn4, col_btn5 = st.columns(5)
 
         with col_btn1:
             masuk = st.form_submit_button("✅ Masuk")
@@ -73,16 +77,43 @@ elif menu == "📝 Log Kehadiran":
             sakit = st.form_submit_button("🤒 Sakit")
         with col_btn4:
             izin = st.form_submit_button("📄 Izin")
+        with col_btn5:
+            cuti = st.form_submit_button("🌴 Cuti")
 
+        # Logika Tombol
         if masuk:
             if id_user and nama:
-                save_data(id_user, nama, "MASUK")
+                save_data(id_user, nama, "MASUK", keterangan_input if keterangan_input else "Hadir")
             else:
                 st.warning("ID dan Nama wajib diisi!")
 
         if keluar:
             if id_user and nama:
-                save_data(id_user, nama, "KELUAR")
+                save_data(id_user, nama, "KELUAR", "Selesai Kerja")
+            else:
+                st.warning("ID dan Nama wajib diisi!")
+
+        if sakit:
+            if id_user and nama and keterangan_input:
+                save_data(id_user, nama, "SAKIT", keterangan_input)
+            elif not keterangan_input:
+                st.error("Mohon isi alasan sakit pada kolom keterangan!")
+            else:
+                st.warning("ID dan Nama wajib diisi!")
+
+        if izin:
+            if id_user and nama and keterangan_input:
+                save_data(id_user, nama, "IZIN", keterangan_input)
+            elif not keterangan_input:
+                st.error("Mohon isi alasan izin pada kolom keterangan!")
+            else:
+                st.warning("ID dan Nama wajib diisi!")
+
+        if cuti:
+            if id_user and nama and keterangan_input:
+                save_data(id_user, nama, "CUTI", keterangan_input)
+            elif not keterangan_input:
+                st.error("Mohon isi alasan cuti pada kolom keterangan!")
             else:
                 st.warning("ID dan Nama wajib diisi!")
 
@@ -95,7 +126,7 @@ elif menu == "⚙️ Manajemen Admin":
     st.title("⚙️ Database Admin")
     password = st.text_input("Masukkan Password Admin", type="password")
 
-    if password == "admin":
+    if password == "kantor":
         df = pd.read_csv(FILE_ABSENSI)
         st.dataframe(df, use_container_width=True)
 
